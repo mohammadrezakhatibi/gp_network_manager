@@ -16,6 +16,8 @@ class GPApiResponse<T> {
   }
 }
 
+typedef Json = Map<String, dynamic>;
+
 enum Status {
   begin,
   loading,
@@ -23,38 +25,34 @@ enum Status {
   error,
 }
 
-class DataResponse<T> {
-  T? data;
-}
+// class DataResponse<T> {
+//   T? data;
 
-class ArrayResponses<T> {
-  List<T> data;
+//   DataResponse.fromJson(Json json) : data = json['data'];
+// }
 
-  ArrayResponses(this.data);
-}
+// class ArrayResponses<T> {
+//   List<T> data;
 
-class ResponsesResults<T> {
-  List<T> results;
+//   ArrayResponses(this.data);
 
-  ResponsesResults(this.results);
-}
+//   ArrayResponses.fromJson(Json json) : data = json['data'];
+// }
 
-class DataItemResponse<T> {
-  List<ItemResponse<T>> data;
+// class ResponsesResults<T> {
+//   List<T> results;
 
-  DataItemResponse(this.data);
-}
+//   ResponsesResults(this.results);
 
-class ItemResponse<T> {
-  List<T> items;
-  Pager? pager;
-  ItemResponse(this.items);
-}
+//   ResponsesResults.fromJson(Json json) : results = json['results'];
+// }
 
-class Pager {
-  int? totalItems;
-  int? pageNumber;
-  int? pageSize;
-}
+// class DataItemResponse<T> {
+//   T data;
 
-class NullResponse {}
+//   DataItemResponse(this.data);
+
+//   DataItemResponse.fromJson(Json json) : data = json['data'];
+// }
+
+// class NullResponse {}
