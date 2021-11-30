@@ -24,35 +24,3 @@ enum Status {
   completed,
   error,
 }
-
-// class DataResponse<T> {
-//   T? data;
-
-//   DataResponse.fromJson(Json json) : data = json['data'];
-// }
-
-// class ArrayResponses<T> {
-//   List<T> data;
-
-//   ArrayResponses(this.data);
-
-//   ArrayResponses.fromJson(Json json) : data = json['data'];
-// }
-
-// class ResponsesResults<T> {
-//   List<T> results;
-
-//   ResponsesResults(this.results);
-
-//   ResponsesResults.fromJson(Json json) : results = json['results'];
-// }
-
-// class DataItemResponse<T> {
-//   T data;
-
-//   DataItemResponse(this.data);
-
-//   DataItemResponse.fromJson(Json json) : data = json['data'];
-// }
-
-// class NullResponse {}

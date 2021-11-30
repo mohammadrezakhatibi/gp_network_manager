@@ -1,11 +1,12 @@
 library gp_network_manager;
 
+import 'package:dio/dio.dart';
+import 'package:dio_smart_retry/dio_smart_retry.dart';
 import 'package:gp_network_manager/models/gp_network_configuration.dart';
-import 'package:gp_network_manager/models/logger.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
-import 'package:http/http.dart' as http;
 import 'models/gp_network_exceptoin.dart';
 import 'models/authentication.dart';
 
@@ -21,13 +22,33 @@ abstract class GPNetworkManager {
 
     try {
       final url = config.baseURL + path;
-      NetworkLogger.callingAPILog(url);
 
-      // Define request headers
-      var requestHeaders = await _prepareRequestHeaders(headers);
+      var _dio = Dio();
 
-      // Send request
-      final response = await http.get(Uri.parse(url), headers: requestHeaders);
+      // Add logger
+      _dio.interceptors.add(PrettyDioLogger(
+          requestHeader: true,
+          requestBody: true,
+          responseBody: true,
+          responseHeader: false,
+          error: true,
+          compact: true,
+          maxWidth: 90));
+
+      // Add retrier
+      _dio.interceptors.add(RetryInterceptor(
+        dio: _dio,
+        logPrint: print,
+        retries: 3,
+        retryDelays: const [
+          Duration(seconds: 1),
+          Duration(seconds: 2),
+          Duration(seconds: 2),
+        ],
+      ));
+      _dio.options.headers = await _prepareRequestHeaders(headers);
+      var response = await _dio.get(url);
+
       responseJson = _response(response);
     } on SocketException {
       throw FetchDataException('No Internet connection');
@@ -41,14 +62,34 @@ abstract class GPNetworkManager {
 
     try {
       final url = config.baseURL + path;
-      NetworkLogger.callingAPILog(url);
 
-      // Define request headers
-      var requestHeaders = await _prepareRequestHeaders(headers);
+      var _dio = Dio();
 
+      // Add logger
+      _dio.interceptors.add(PrettyDioLogger(
+          requestHeader: true,
+          requestBody: true,
+          responseBody: true,
+          responseHeader: false,
+          error: true,
+          compact: true,
+          maxWidth: 90));
+
+      // Add retrier
+      _dio.interceptors.add(RetryInterceptor(
+        dio: _dio,
+        logPrint: print,
+        retries: 3,
+        retryDelays: const [
+          Duration(seconds: 1),
+          Duration(seconds: 2),
+          Duration(seconds: 2),
+        ],
+      ));
+
+      _dio.options.headers = await _prepareRequestHeaders(headers);
       // Send request
-      final response =
-          await http.post(Uri.parse(url), headers: requestHeaders, body: body);
+      final response = await _dio.post(url, data: body);
       responseJson = _response(response);
     } on SocketException {
       throw FetchDataException('No Internet connection');
@@ -62,56 +103,34 @@ abstract class GPNetworkManager {
 
     try {
       final url = config.baseURL + path;
-      NetworkLogger.callingAPILog(url);
 
-      // Define request headers
-      var requestHeaders = await _prepareRequestHeaders(headers);
+      var _dio = Dio();
 
+      // Add logger
+      _dio.interceptors.add(PrettyDioLogger(
+          requestHeader: true,
+          requestBody: true,
+          responseBody: true,
+          responseHeader: false,
+          error: true,
+          compact: true,
+          maxWidth: 90));
+
+      // Add retrier
+      _dio.interceptors.add(RetryInterceptor(
+        dio: _dio,
+        logPrint: print,
+        retries: 3,
+        retryDelays: const [
+          Duration(seconds: 1),
+          Duration(seconds: 2),
+          Duration(seconds: 2),
+        ],
+      ));
+
+      _dio.options.headers = await _prepareRequestHeaders(headers);
       // Send request
-      final response =
-          await http.put(Uri.parse(url), headers: requestHeaders, body: body);
-      responseJson = _response(response);
-    } on SocketException {
-      throw FetchDataException('No Internet connection');
-    }
-    return responseJson;
-  }
-
-  Future<dynamic> delete(String path,
-      {RequestHeader? headers, Object? body}) async {
-    dynamic responseJson;
-
-    try {
-      final url = config.baseURL + path;
-      NetworkLogger.callingAPILog(url);
-
-      // Define request headers
-      var requestHeaders = await _prepareRequestHeaders(headers);
-
-      // Send request
-      final response = await http.delete(Uri.parse(url),
-          headers: requestHeaders, body: body);
-      responseJson = _response(response);
-    } on SocketException {
-      throw FetchDataException('No Internet connection');
-    }
-    return responseJson;
-  }
-
-  Future<dynamic> patch(String path,
-      {RequestHeader? headers, Object? body}) async {
-    dynamic responseJson;
-
-    try {
-      final url = config.baseURL + path;
-      NetworkLogger.callingAPILog(url);
-
-      // Define request headers
-      var requestHeaders = await _prepareRequestHeaders(headers);
-
-      // Send request
-      final response =
-          await http.patch(Uri.parse(url), headers: requestHeaders, body: body);
+      final response = await _dio.put(url, data: body);
       responseJson = _response(response);
     } on SocketException {
       throw FetchDataException('No Internet connection');
@@ -165,10 +184,10 @@ extension AddTokenToHeaders on GPNetworkManager {
 }
 
 extension _Response on GPNetworkManager {
-  dynamic _response(http.Response response) {
+  dynamic _response(dynamic response) {
     switch (response.statusCode) {
       case 200:
-        var responseJson = json.decode(response.body.toString());
+        var responseJson = json.decode(response.toString());
         switch (responseJson["successed"]) {
           case true:
             return responseJson;
@@ -177,28 +196,13 @@ extension _Response on GPNetworkManager {
                 responseJson["1"]["messages"].toString());
         }
       case 400:
-        NetworkLogger.errorLog(
-            response.body.toString(),
-            response.request?.url.toString(),
-            response.statusCode,
-            response.body);
-        throw BadRequestException(response.body.toString());
+        throw BadRequestException();
       case 401:
       case 403:
-        NetworkLogger.errorLog(
-            response.body.toString(),
-            response.request?.url.toString(),
-            response.statusCode,
-            response.body);
-        throw UnauthorisedException(response.body.toString());
+        throw UnauthorisedException();
       case 500:
 
       default:
-        NetworkLogger.errorLog(
-            response.body.toString(),
-            response.request?.url.toString(),
-            response.statusCode,
-            response.request!.headers.toString());
         throw FetchDataException(
             'Error occured while Communication with Server with StatusCode : ${response.statusCode}');
     }
