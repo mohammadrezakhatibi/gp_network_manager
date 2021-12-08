@@ -14,8 +14,8 @@ typedef RequestHeader = Map<String, String>;
 
 class GPNetworkConfiguration {
   String baseURL = "";
-  int retryCount = 3;
-
+  int? retryCount = 3;
   RequestHeader? defaultHeaders;
-  GPNetworkConfiguration(this.baseURL, this.retryCount, {this.defaultHeaders});
+
+  GPNetworkConfiguration(this.baseURL, {this.retryCount, this.defaultHeaders});
 }

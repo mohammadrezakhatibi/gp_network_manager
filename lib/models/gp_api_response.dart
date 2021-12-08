@@ -1,14 +1,14 @@
 class GPApiResponse<T> {
-  Status status;
+  ResponseStatus status;
   T? data;
   String? message;
 
-  GPApiResponse({this.status = Status.begin, this.data, this.message});
+  GPApiResponse({this.status = ResponseStatus.begin, this.data, this.message});
 
-  GPApiResponse.begin() : status = Status.begin;
-  GPApiResponse.loading(this.message) : status = Status.loading;
-  GPApiResponse.completed(this.data) : status = Status.completed;
-  GPApiResponse.error(this.message) : status = Status.error;
+  GPApiResponse.begin() : status = ResponseStatus.begin;
+  GPApiResponse.loading(this.message) : status = ResponseStatus.loading;
+  GPApiResponse.completed(this.data) : status = ResponseStatus.completed;
+  GPApiResponse.error(this.message) : status = ResponseStatus.error;
 
   @override
   String toString() {
@@ -18,7 +18,7 @@ class GPApiResponse<T> {
 
 typedef Json = Map<String, dynamic>;
 
-enum Status {
+enum ResponseStatus {
   begin,
   loading,
   completed,

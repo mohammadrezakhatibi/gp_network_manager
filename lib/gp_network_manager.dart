@@ -192,8 +192,7 @@ extension _Response on GPNetworkManager {
           case true:
             return responseJson;
           default:
-            throw RequestErrorException(
-                responseJson["1"]["messages"].toString());
+            throw RequestErrorException(responseJson["messages"][0].toString());
         }
       case 400:
         throw BadRequestException();
